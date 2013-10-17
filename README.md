@@ -43,7 +43,9 @@ Extract the output data from the response:
     for artist in response['artists']:
         print artist['id'], artist['name']
         
-Refer to the [Echo Nest API documentation](http://developer.echonest.com/docs/v4) for details on the methods and parameters.  Note that most API calls require a 'get' request but certain API method calls require a 'post'. Use the ```Pyen.get``` and the ```Pyen.post``` where appropriate.  The Echo Nest API documentation indicates wether a `get` or a `post` is required.
+Refer to the [Echo Nest API documentation](http://developer.echonest.com/docs/v4) for details on the methods and parameters.
+Note that most API calls require a 'get' request but certain API method calls require a 'post'. Use the ```Pyen.get``` and
+the ```Pyen.post``` where appropriate.  The Echo Nest API documentation indicates whether a `get` or a `post` is required.
    
 ## Quick Examples
 
