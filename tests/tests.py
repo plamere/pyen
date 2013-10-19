@@ -2,6 +2,7 @@ import pyen
 import time
 import unittest
 import random
+import os.path
 
 
 class TestPyEn(unittest.TestCase):
@@ -39,12 +40,13 @@ class TestPyEn(unittest.TestCase):
 
     def test_track_upload(self):
         params = { 'filetype': 'ogg' }
-        f = open('../audio/test.ogg', 'rb')
+        f_path = os.path.join(os.path.dirname(__file__), '../audio/test.ogg')
+        f = open(f_path, 'rb')
         response = self.en.post('track/upload', params, files={'track': f} )
         trid = response['track']['id']
         while True:
             response = self.en.get('track/profile', {'id' : trid, 'bucket' :['audio_summary']} )
-            if response['track']['status'] <> 'pending':
+            if response['track']['status'] != 'pending':
                 break
             time.sleep(1)
         self.assertTrue(response['track']['status'] == 'complete')
@@ -52,23 +54,23 @@ class TestPyEn(unittest.TestCase):
 
     def test_random_walk(self):
         artist_name = 'The Beatles'
-        for i in xrange(10):
+        for i in range(10):
             response = self.en.get('artist/similar', {'name': artist_name, 'results': 15} )
-            print artist_name
+            print(artist_name)
             self.assertTrue(len(response['artists']) == 15)
             for artist in response['artists']:
-                print '   --> ', artist['name']
+                print("   --> {0}".format(artist['name']))
             artist_name = random.choice(response['artists'])['name']
 
     def test_slow_random_walk(self):
         en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0') # the low rate limit key
         artist_name = 'The Beatles'
-        for i in xrange(5):
+        for i in range(5):
             response = self.en.get('artist/similar', {'name': artist_name, 'results': 15} )
-            print artist_name
+            print(artist_name)
             self.assertTrue(len(response['artists']) == 15)
             for artist in response['artists']:
-                print '   --> ', artist['name']
+                print('   --> {0}'.format(artist['name']))
             artist_name = random.choice(response['artists'])['name']
         
 
