@@ -5,7 +5,9 @@ import time
 ''' A simple and thin python library for the Echo Nest API
 '''
 
-class Pyen:
+class PyenConfigurationException(Exception): pass
+
+class Pyen(object):
 
     default_config = {
         'rate_limit': 0,  # calls per minute
@@ -29,7 +31,7 @@ class Pyen:
             if 'ECHO_NEST_API_KEY' in os.environ:
                 api_key = os.environ['ECHO_NEST_API_KEY']
             else:
-                raise Exception("Pyen:Can't find your API key anywhere")
+                raise PyenConfigurationException("Can't find your API key anywhere")
 
         self.api_key = api_key
         self.config = self.default_config
@@ -44,7 +46,8 @@ class Pyen:
                 if key in self.config:
                     self.config[key] = val
                 else:
-                    print >> sys.stderr, "Unknown configuration item", key
+                    msg = "Unknown configuration item {0}".format(key)
+                    raise PyenConfigurationException(msg)
 
         if self.config['rate_limit'] > 0:
             self.time_per_call = 60. / self.config['rate_limit']
@@ -97,21 +100,21 @@ class Pyen:
             else:
                 r = requests.post(url, data=full_params)
             if self.trace:
-                print 'send', r.url, full_params
+                print('send {0} {1}'.format(r.url, full_params))
         else:
             r = requests.get(url, params=full_params)
             if self.trace:
-                print 'send', r.url
+                print('send {0}'.format(r.url))
 
 
 
         if self.trace and r.status_code >= 400 and r.status_code < 500:
-            print 'error', r.status_code, r.url
+            print('error {0} {1}'.format(r.status_code, r.url))
 
         r.raise_for_status()
 
         if self.trace_header:
-            print 'header', r.headers 
+            print('header {0}'.format(repr(r.headers)))
 
         if self.time_per_call == 0:
             if 'x-ratelimit-limit' in r.headers:
@@ -123,12 +126,12 @@ class Pyen:
             
 
         if self.trace:
-            print 'resp:', r.text
+            print('resp: {0}'.format(r.text))
 
         results =  r.json()
 
         response = results['response']
-        if response['status']['code'] <> 0:
+        if response['status']['code'] != 0:
             raise Exception('(' + str(response['status']['code']) + ') - ' + response['status']['message'])
 
         return response

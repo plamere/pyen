@@ -7,4 +7,5 @@ setup(
     author="@plamere",
     author_email="paul@echonest.com",
     url='http://github.com/plamere/pyen',
+    install_requires=['requests>=1.0',],
     py_modules=['pyen'],)
