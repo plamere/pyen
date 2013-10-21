@@ -11,7 +11,7 @@ en.trace = False
 artist_name = 'The Beatles'
 
 for i in xrange(10):
-    response = en.get('artist/similar', {'name': artist_name} )
+    response = en.get('artist/similar', name = artist_name)
 
     print artist_name
     for artist in response['artists']:

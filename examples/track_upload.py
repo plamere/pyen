@@ -1,9 +1,6 @@
 import pyen
 import sys
-import os
-import simplejson as json
 import time
-import pprint
 
 
 en = pyen.Pyen()
@@ -11,7 +8,7 @@ en.trace = False
 
 def wait_for_analysis(id):
     while True:
-        response = en.get('track/profile', {'id' : id, 'bucket' :['audio_summary']} )
+        response = en.get('track/profile', id=id, bucket=['audio_summary'])
         if response['track']['status'] <> 'pending':
             break
         time.sleep(1)

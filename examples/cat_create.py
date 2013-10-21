@@ -11,7 +11,7 @@ if len(sys.argv) > 1:
         'name': name,
         'type': 'general'
     }
-    response = en.post('catalog/create', params)
+    response = en.post('catalog/create', **params)
     print response['name']
     print response['id']
     print response['type']

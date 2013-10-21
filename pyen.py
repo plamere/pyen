@@ -1,9 +1,13 @@
 import requests
 import os
 import time
+import json
+import logging
 
 ''' A simple and thin python library for the Echo Nest API
 '''
+
+logger = logging.getLogger('pyen')
 
 class PyenConfigurationException(Exception): pass
 
@@ -11,10 +15,13 @@ class Pyen(object):
 
     default_config = {
         'rate_limit': 0,  # calls per minute
-        'prefix': 'http://developer.echonest.com/api/v4/'
+        'prefix': 'api/v4',
+        'transport': 'http',
+        'host': 'developer.echonest.com',
+        'api_key': None,
     }
 
-    def __init__(self, api_key=None, config=None):
+    def __init__(self, **kwargs):
         """ Creates a new Pyen
 
         Args:
@@ -27,94 +34,66 @@ class Pyen(object):
                                 is automatically detected
         """
 
-        if api_key == None:
-            if 'ECHO_NEST_API_KEY' in os.environ:
-                api_key = os.environ['ECHO_NEST_API_KEY']
-            else:
-                raise PyenConfigurationException("Can't find your API key anywhere")
+        for k,v in kwargs.items():
+            if k not in self.default_config:
+                raise PyenConfigurationException("Unknown configuration item {0}".format(k))
 
-        self.api_key = api_key
-        self.config = self.default_config
+        self.config = {}
+        self.config.update(self.default_config)
+        self.config.update(kwargs)
+
+        if not self.config['api_key']:
+            self.config['api_key'] = os.environ.get('ECHO_NEST_API_KEY')
+
+        if not self.config['api_key']:
+            raise PyenConfigurationException("Can't find your API key anywhere")
+
+        self.api_key = self.config['api_key']
         self.last_command_time = 0
         self.time_per_call = 0
         self.trace = False
         self.trace_header = False
 
-
-        if (config):
-            for key, val in config.items():
-                if key in self.config:
-                    self.config[key] = val
-                else:
-                    msg = "Unknown configuration item {0}".format(key)
-                    raise PyenConfigurationException(msg)
-
         if self.config['rate_limit'] > 0:
             self.time_per_call = 60. / self.config['rate_limit']
 
-    def post(self, method, params = None, files = None):
-        """ Makes a post request.
+    def _internal_call(self, verb, method, params):
 
-            Args:
-                method (str): the name of the API method (such as 'artist/profile')
-                params (dict): API parameters
-                files: (dict): optional - files to be uploaded with the post
+        clean_params = dict(api_key = self.config['api_key'])
+        files = {}
 
-            Returns:
-                the Echo Nest Response as a dictionary
+        for k,v in params.items():
+            if isinstance(v, bool):
+                v = 'true' if v else 'false'
+            elif hasattr(v, 'read') and hasattr(v, 'close'):
+                files[k] = v
+                continue
+            elif (method== 'catalog/update' and k == 'data'
+                    and not isinstance(v, str)):
+                v = json.dumps(v)
+            clean_params[k] = v
 
-            Raises:
-                Exception - on a transport or Echo Nest error
-        """
-        return self.get(method, params, True, files)
-
-
-    def get(self, method, params = None, use_post=False, files=None):
-        """ Makes a get request
-
-            Args:
-                method (str): the name of the API method (such as 'artist/profile')
-                params (dict): (optional) API parameters
-
-            Returns:
-                the Echo Nest Response as a dictionary
-
-            Raises:
-                Exception - on a transport or Echo Nest error
-        """
-        self.throttle()
-        url = self.config['prefix'] + method
-
-        full_params = {
-            'api_key' : self.api_key
-        }
-
-        if params:
-            full_params.update(params)
-            self.normalize(full_params)
-
-        if use_post:
-            #url = 'http://requestb.in/1drkod21'
-            if files:
-                r = requests.post(url, data=full_params, files=files)
-            else:
-                r = requests.post(url, data=full_params)
-            if self.trace:
-                print('send {0} {1}'.format(r.url, full_params))
+        if verb == 'GET':
+            args = dict(params=clean_params)
         else:
-            r = requests.get(url, params=full_params)
-            if self.trace:
-                print('send {0}'.format(r.url))
+            args = dict(data=clean_params)
+            if files:
+                args['files'] = files
 
+        url = '{0}://{1}/{2}/{3}'.format(self.config['transport'],
+                                            self.config['host'],
+                                            self.config['prefix'], method)
+        logger.debug('URL: {0}'.format(url))
+        logger.debug('ARGS: {0}'.format(repr(params)))
 
+        r = requests.request(verb, url, **args)
 
-        if self.trace and r.status_code >= 400 and r.status_code < 500:
-            print('error {0} {1}'.format(r.status_code, r.url))
+        if r.status_code >= 400 and r.status_code < 500:
+            logger.error('ERROR {0} {1}'.format(r.status_code, r.url))
 
         r.raise_for_status()
 
-        if self.trace_header:
-            print('header {0}'.format(repr(r.headers)))
+        logger.debug('HEADERS {0}'.format(repr(r.headers)))
 
         if self.time_per_call == 0:
             if 'x-ratelimit-limit' in r.headers:
@@ -124,9 +103,7 @@ class Pyen(object):
                     self.time_per_call = 60. / rate_limit
                     # print 'auto set of rate limit to', rate_limit, 'TPC is', self.time_per_call
             
-
-        if self.trace:
-            print('resp: {0}'.format(r.text))
+        logger.debug('RESP: {0}'.format(r.text))
 
         results =  r.json()
 
@@ -136,12 +113,18 @@ class Pyen(object):
 
         return response
 
-    def normalize(self, params):
-        for key, value in params.items():
-            if type(value) == bool:
-                params[key] = 'true' if value else 'false'
 
-    def get_rate_limit():
+    def post(self, method, args = None, **kwargs):
+        if args:
+            kwargs.update(args)
+        return self._internal_call('POST', method, kwargs)
+
+    def get(self, method, args = None, **kwargs):
+        if args:
+            kwargs.update(args)
+        return self._internal_call('GET', method, kwargs)
+
+    def get_rate_limit(self):
         return self.config['rate_limit']
 
     def throttle(self):

@@ -7,12 +7,12 @@ import random
 # per minute, which should generate an error
 
 
-en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0', config={'rate_limit': 120} )
+en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0', rate_limit=120 )
 
 artist_name = 'The Beatles'
 
 for i in xrange(10):
-    response = en.get('artist/similar', {'name': artist_name} )
+    response = en.get('artist/similar', name=artist_name )
 
     print artist_name
     for artist in response['artists']:
