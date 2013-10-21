@@ -2,7 +2,7 @@ import pyen
 import sys
 
 
-en = pyen.Pyen(api_key=None,)
+en = pyen.Pyen()
 
 if len(sys.argv) > 1:
     artist = ' '.join(sys.argv[1:])

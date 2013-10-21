@@ -29,9 +29,15 @@ To get started:
 - **Get an API key** - to use the Echo Nest API you need an Echo Nest API key.  You can get one for free at [developer.echonest.com](http://developer.echonest.com).
 - **Set the API** key - you can do this one of two ways:
    - Set an environment variable named `ECHO_NEST_API_KEY` to your API key
-   - or Explicitly call the Pyen constructor with your API key like so:
+   - or Explicitly call the Pyen constructor with your API key 
    
-    ```en = pyen.Pyen("YOUR_API_KEY")```
+Get the API key from your ECHO_NEST_API_KEY environment variable:
+   
+    en = pyen.Pyen()
+
+Explicitly set the API key:
+
+    en = pyen.Pyen("YOUR_API_KEY")
     
 Call the Pyen.get or the Pyen.post method to make API requests. Here's an example:
 
@@ -52,19 +58,6 @@ the ```Pyen.post``` where appropriate.  The Echo Nest API documentation indicate
 Create a playlist with a seed artist of Weezer:
 
     import pyen
-
-    # Construct pyen as so:
-    #
-    # en = pyen.Pyen()
-    #
-    # this will get your API key from the environment
-    # variable ECHO_NEST_API_KEY
-    # 
-    # alternatively you can call the constructor with the API key
-    # like so:
-    #
-    #  en = pyen.Pyen("YOUR_API_KEY")
-
     en = pyen.Pyen()
     response = en.get('playlist/static', 
         {'artist': 'Weezer', 'type': 'artist-radio'} )
@@ -213,25 +206,22 @@ Upload and analyze a track:
 There are a number of other [examples](http://github.com/plamere/pyen/examples) on github.
 
 ## Configuration
-You can configure pyen by passing a configuration dictionary
-into the constructor like so:
-
-    config = {
-        'rate_limit': 120,     # the allowed calls per second
-    }
-    en = pyen.Pyen(YOUR_API_KEY, config)
+You can configure pyen by setting attributes. For example, to enable tracing of method calls and responses:
+    
+    en = pyen.Pyen()
+    en.trace = True
+ 
 
 Current configuration parameters are:
 
-- rate_limit - the number of calls per minute that your API key is allowed to make. Note that you should rarely need to set this configuration value since the rate_limit is automatically detected.
-
-You can turn tracing of requests and responses on and off by setting the `trace` variable:
-
-        en = pyen.Pyen()
-        en.trace = True
+- **api_key** - your Echo Nest API key.
+- **auto_throttle** - (default True) - if True, pyen will throttle your API calls to match your rate limit.
+- **trace** - (default True) - trace api calls and responses
+- **trace_header** - (default False) - trace response headers
+- **max_retries** - (default 5) - maximum number of retries when hitting the rate limit
 
 ## Notes
-`pyen` will automatically detect your rate limit (by examining the response headers) and automatically throttle your API call rate to match that rate limit.
+`pyen` will automatically detect your rate limit (by examining the response headers) and automatically throttle your API call rate to match that rate limit. If you turn off this behavior (by setting auto_throttle to False), pyen will throw an exception if you exceed the rate limit.
 
 When an error is detected(via the http response or via the Echo Nest return status code) a python exception is raised.
 

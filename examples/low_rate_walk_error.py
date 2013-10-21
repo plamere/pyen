@@ -7,7 +7,9 @@ import random
 # per minute, which should generate an error
 
 
-en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0', config={'rate_limit': 120} )
+en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0')
+
+en.auto_throttle=False
 
 artist_name = 'The Beatles'
 

@@ -18,4 +18,3 @@ if len(sys.argv) > 1:
 else:
     print "usage: python cat_create.py catalog name"
 
-

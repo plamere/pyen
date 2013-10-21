@@ -65,8 +65,8 @@ class TestPyEn(unittest.TestCase):
     def test_slow_random_walk(self):
         en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0') # the low rate limit key
         artist_name = 'The Beatles'
-        for i in range(5):
-            response = self.en.get('artist/similar', {'name': artist_name, 'results': 15} )
+        for i in range(3):
+            response = en.get('artist/similar', {'name': artist_name, 'results': 15} )
             print(artist_name)
             self.assertTrue(len(response['artists']) == 15)
             for artist in response['artists']:
