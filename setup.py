@@ -1,8 +1,9 @@
-from distutils.core import setup
+from setuptools import setup
+
 
 setup(
     name='pyen',
-    version='1.1', 
+    version='1.2', 
     description='simple client for The Echo Nest',
     author="@plamere",
     author_email="paul@echonest.com",
