@@ -1,7 +1,5 @@
 import pyen
 import sys
-import os
-import simplejson as json
 import time
 
 
@@ -55,9 +53,9 @@ if len(sys.argv) > 1:
 
     params = {
         'id': cat_id,
-        'data' : json.dumps(items)
+        'data' : items
     }
-    response = en.post('catalog/update', params)
+    response = en.post('catalog/update', **params)
     ticket = response['ticket']
     wait_for_ticket(ticket)
 else:

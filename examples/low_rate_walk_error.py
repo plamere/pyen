@@ -8,13 +8,12 @@ import random
 
 
 en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0')
-
 en.auto_throttle=False
 
 artist_name = 'The Beatles'
 
 for i in xrange(10):
-    response = en.get('artist/similar', {'name': artist_name} )
+    response = en.get('artist/similar', name=artist_name )
 
     print artist_name
     for artist in response['artists']:

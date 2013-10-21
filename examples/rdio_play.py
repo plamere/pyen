@@ -20,7 +20,7 @@ if len(sys.argv) > 1:
         'bucket' : ['id:rdio-US', 'tracks'],
         'limit' : True
     }
-    response = en.get('playlist/static', params)
+    response = en.get('playlist/static', **params)
     songs = response['songs']
     if len(songs) > 0:
         song = songs[0]

@@ -59,8 +59,8 @@ Create a playlist with a seed artist of Weezer:
 
     import pyen
     en = pyen.Pyen()
-    response = en.get('playlist/static', 
-        {'artist': 'Weezer', 'type': 'artist-radio'} )
+    response = en.get('playlist/static', artist = 'Weezer',
+                        type = 'artist-radio')
     for i, song in enumerate(response['songs']):
         print "%d %-32.32s %s" % (i, song['artist_name'], song['title'])
 
@@ -71,10 +71,9 @@ Random walk through similar artists:
     import random
 
     en = pyen.Pyen()
-    en.trace = False # set to true to turn on tracing
     artist_name = 'The Beatles'
     for i in xrange(500):
-        response = en.get('artist/similar', {'name': artist_name} )
+        response = en.get('artist/similar', name =  artist_name)
         print artist_name
         for artist in response['artists']:
             print '   --> ', artist['name']
@@ -89,7 +88,7 @@ Create a taste profile:
         'name': 'test-catalog,
         'type': 'general'
     }
-    response = en.post('catalog/create', params)
+    response = en.post('catalog/create', **params)
     print response['id']
     
 
@@ -98,7 +97,6 @@ Update a taste profile:
     import pyen
     import sys
     import os
-    import simplejson as json
     import time
 
     en = pyen.Pyen()
@@ -150,9 +148,9 @@ Update a taste profile:
 
         params = {
             'id': cat_id,
-            'data' : json.dumps(items)
+            'data' : items,
         }
-        response = en.post('catalog/update', params)
+        response = en.post('catalog/update', **params)
         ticket = response['ticket']
         wait_for_ticket(ticket)
     else:
@@ -172,10 +170,8 @@ Upload and analyze a track:
 
     def wait_for_analysis(id):
         while True:
-            response = en.get('track/profile', 
-            	{'id' : id, 
-            	  'bucket' :['audio_summary']
-            })
+            response = en.get('track/profile', id = id,
+                                bucket = ['audio_summary'])
             if response['track']['status'] <> 'pending':
                 break
             time.sleep(1)
@@ -196,7 +192,7 @@ Upload and analyze a track:
         # note that this is done via a post, with params in the params
         # dictionary, and the file in a files dictionary.
         
-        response = en.post('track/upload', params, files={'track': f} )
+        response = en.post('track/upload', filetype = type, tracks = f)
         trid = response['track']['id']
         print 'track id is', trid
         wait_for_analysis(trid)
@@ -210,7 +206,6 @@ You can configure pyen by setting attributes. For example, to enable tracing of 
     
     en = pyen.Pyen()
     en.trace = True
- 
 
 Current configuration parameters are:
 
@@ -219,6 +214,11 @@ Current configuration parameters are:
 - **trace** - (default True) - trace api calls and responses
 - **trace_header** - (default False) - trace response headers
 - **max_retries** - (default 5) - maximum number of retries when hitting the rate limit
+
+You can turn tracing of requests and responses on and off by setting the `pyen` logger:
+
+        import logging
+        logging.getLogger('pyen').setLevel(logging.DEBUG)
 
 ## Notes
 `pyen` will automatically detect your rate limit (by examining the response headers) and automatically throttle your API call rate to match that rate limit. If you turn off this behavior (by setting auto_throttle to False), pyen will throw an exception if you exceed the rate limit.

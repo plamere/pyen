@@ -7,7 +7,7 @@ en = pyen.Pyen()
 artist_name = 'The Beatles'
 
 for i in xrange(500):
-    response = en.get('artist/similar', {'name': artist_name} )
+    response = en.get('artist/similar', name=artist_name)
 
     print artist_name
     for artist in response['artists']:

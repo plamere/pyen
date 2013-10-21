@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pyen',
-    version='1.2', 
+    version='2.0', 
     description='simple client for The Echo Nest',
     author="@plamere",
     author_email="paul@echonest.com",
