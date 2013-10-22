@@ -100,7 +100,7 @@ class TestPyEn(unittest.TestCase):
         max_tries = 10
         while max_tries > 0:
             response = self.en.get('catalog/status', ticket = ticket)
-            if response['ticket_status'] <> 'pending':
+            if response['ticket_status'] != 'pending':
                 break
             time.sleep(1)
             max_tries -= 1
@@ -188,12 +188,12 @@ class TestPyEn(unittest.TestCase):
             response = self.en.get('artist/profile', name=name)
             self.assertTrue(name == response['artist']['name'], 'name check for ' + name)
 
-        name_check('Weezer')
-        name_check('Mötley Crüe')
-        name_check('Björk')
-        name_check('!!!')
-        name_check('Hall & Oates')
-        name_check('Beyoncé')
+        name_check(u'Weezer')
+        name_check(u'M\xf6tley Cr\xfce')
+        name_check(u'Bj\xf6rk')
+        name_check(u'!!!')
+        name_check(u'Hall & Oates')
+        name_check(u'Beyonc\xe9')
 
     def test_top_hot_from_france(self):
         old_locale = locale.getlocale(locale.LC_ALL)
