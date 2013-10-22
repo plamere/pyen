@@ -9,7 +9,7 @@ en.trace = False
 
 def wait_for_ticket(ticket):
     while True:
-        response = en.get('catalog/status', {'ticket':ticket})
+        response = en.get('catalog/status', ticket=ticket)
         if response['ticket_status'] <> 'pending':
             break
         time.sleep(1)
@@ -50,12 +50,7 @@ if len(sys.argv) > 1:
             }
         }
     ]
-
-    params = {
-        'id': cat_id,
-        'data' : items
-    }
-    response = en.post('catalog/update', **params)
+    response = en.post('catalog/update', id=cat_id, data=items)
     ticket = response['ticket']
     wait_for_ticket(ticket)
 else:

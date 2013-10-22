@@ -3,9 +3,8 @@ import pyen
 import random
 
 # this API key has a very low rate limit
-# we will try to call it with 120 times
-# per minute, which should generate an error
-
+# with auto_throttle disabled we will generate
+# a 429 error when we reach the rate limit
 
 en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0')
 en.auto_throttle=False

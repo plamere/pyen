@@ -7,11 +7,7 @@ en = pyen.Pyen()
 
 if len(sys.argv) > 1:
     name = ' '.join(sys.argv[1:])
-    params = {
-        'name': name,
-        'type': 'general'
-    }
-    response = en.post('catalog/create', **params)
+    response = en.post('catalog/create', name=name, type='general')
     print response['name']
     print response['id']
     print response['type']

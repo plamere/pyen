@@ -42,7 +42,7 @@ Explicitly set the API key:
 Call the Pyen.get or the Pyen.post method to make API requests. Here's an example:
 
     en = pyen.Pyen()  # create the EN api
-    response = en.get('artist/similar', {'name': artist_name} )
+    response = en.get('artist/similar', name='weezer')
 
 Extract the output data from the response:
 
@@ -59,8 +59,8 @@ Create a playlist with a seed artist of Weezer:
 
     import pyen
     en = pyen.Pyen()
-    response = en.get('playlist/static', artist = 'Weezer',
-                        type = 'artist-radio')
+    
+    response = en.get('playlist/static', artist = 'Weezer', type = 'artist-radio')
     for i, song in enumerate(response['songs']):
         print "%d %-32.32s %s" % (i, song['artist_name'], song['title'])
 
@@ -79,142 +79,34 @@ Random walk through similar artists:
             print '   --> ', artist['name']
         artist_name = random.choice(response['artists'])['name']
 
-Create a taste profile:
+
+
+Create a taste profile (note the 'post' call):
 
     import pyen
 
     en = pyen.Pyen()
-    params = {
-        'name': 'test-catalog,
-        'type': 'general'
-    }
-    response = en.post('catalog/create', **params)
+
+    response = en.post('catalog/create', name='test-catalog', type='general')
     print response['id']
-    
-
-Update a taste profile:
-
-    import pyen
-    import sys
-    import os
-    import time
-
-    en = pyen.Pyen()
-    en.trace = False
-
-    def wait_for_ticket(ticket):
-        while True:
-            response = en.get('catalog/status', {'ticket':ticket})
-            if response['ticket_status'] <> 'pending':
-                break
-            time.sleep(1)
-
-        print 'status  ', response['ticket_status'] 
-        print 'items   ', response['total_items'] 
-        print 'updated ', response['items_updated'] 
-        print 'complete', response['percent_complete'] 
+  
+## More Examples
+A full set of examples can be found in the [Pyen examples directory](https://github.com/plamere/pyen/tree/master/examples)  
 
 
-    if len(sys.argv) > 1:
-        cat_id = sys.argv[1]
-        items = [
-            {
-                "action": "update",
-                "item" : {
-                    "item_id" : "1",
-                    "song_name" : "el scorcho",
-                    "artist_name" : "weezer",
-                }
-            },
-            {
-                "action": "update",
-                "item" : {
-                    "item_id" : "2",
-                    "song_name" : "boyfriend",
-                    "artist_name" : "justin bieber",
-                    "banned" : True
-                }
-            },
-            {
-                "action": "update",
-                "item" : {
-                    "item_id" : "3",
-                    "song_name" : "call me maybe",
-                    "artist_name" : "carly rae jepsen",
-                    "play_count": 20,
-                }
-            }
-        ]
-
-        params = {
-            'id': cat_id,
-            'data' : items,
-        }
-        response = en.post('catalog/update', **params)
-        ticket = response['ticket']
-        wait_for_ticket(ticket)
-    else:
-        print "usage: python cat_update.py cat_id"
-
-
-Upload and analyze a track:
-
-    import pyen
-    import sys
-    import os
-    import time
-    import pprint
-
-    en = pyen.Pyen()
-    en.trace = False
-
-    def wait_for_analysis(id):
-        while True:
-            response = en.get('track/profile', id = id,
-                                bucket = ['audio_summary'])
-            if response['track']['status'] <> 'pending':
-                break
-            time.sleep(1)
-
-        for k,v in response['track']['audio_summary'].items():
-            print "%32.32s %s" % (k, str(v))
-
-    if len(sys.argv) > 2:
-        mp3 = sys.argv[1]
-        type = sys.argv[2]
-
-        params = {
-            'filetype': type,
-        }
-
-        f = open(mp3, 'rb')
-        
-        # note that this is done via a post, with params in the params
-        # dictionary, and the file in a files dictionary.
-        
-        response = en.post('track/upload', filetype = type, tracks = f)
-        trid = response['track']['id']
-        print 'track id is', trid
-        wait_for_analysis(trid)
-    else:
-        print "usage: python track_upload.py path-audio audio-type"
-
-There are a number of other [examples](http://github.com/plamere/pyen/examples) on github.
 
 ## Configuration
 You can configure pyen by setting attributes. For example, to enable tracing of method calls and responses:
     
     en = pyen.Pyen()
-    en.trace = True
 
 Current configuration parameters are:
 
 - **api_key** - your Echo Nest API key.
 - **auto_throttle** - (default True) - if True, pyen will throttle your API calls to match your rate limit.
-- **trace** - (default True) - trace api calls and responses
-- **trace_header** - (default False) - trace response headers
 - **max_retries** - (default 5) - maximum number of retries when hitting the rate limit
 
+## Logging
 You can turn tracing of requests and responses on and off by setting the `pyen` logger:
 
         import logging

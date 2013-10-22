@@ -1,16 +1,17 @@
-
 import pyen
 import random
+import logging
 
+logging.basicConfig()
 
-# this API key has a very low rate limit
+en = pyen.Pyen()
 
-en = pyen.Pyen(api_key='YDLX4ITBBQHH3PHU0')
+logging.getLogger('pyen').setLevel(logging.DEBUG)
 
 artist_name = 'The Beatles'
 
-for i in xrange(10):
-    response = en.get('artist/similar', name = artist_name)
+for i in xrange(500):
+    response = en.get('artist/similar', name=artist_name)
 
     print artist_name
     for artist in response['artists']:

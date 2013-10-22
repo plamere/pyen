@@ -21,12 +21,8 @@ if len(sys.argv) > 2:
     mp3 = sys.argv[1]
     type = sys.argv[2]
 
-    params = {
-        'filetype': type,
-    }
-
     f = open(mp3, 'rb')
-    response = en.post('track/upload', params, files={'track': f} )
+    response = en.post('track/upload', track=f, filetype=type)
     trid = response['track']['id']
     print 'track id is', trid
     wait_for_analysis(trid)

@@ -11,6 +11,13 @@ import logging
 logger = logging.getLogger('pyen')
 
 class PyenConfigurationException(Exception): pass
+class PyenException(Exception):
+    def __init__(self, http_status, code, msg):
+        self.http_status = http_status
+        self.code = code
+        self.msg = msg
+    def __str__(self):
+        return 'http status: {0}, code:{1} - {2}'.format(self.http_status, self.code, self.msg)
 
 class Pyen(object):
 
@@ -26,11 +33,14 @@ class Pyen(object):
         if not api_key:
             api_key = os.environ.get('ECHO_NEST_API_KEY')
 
+        self.next_command_time = 0
+
         # These are things we can config
         self.api_key = api_key
         self.auto_throttle = True
         self.prefix = 'http://developer.echonest.com/api/v4/'
         self.max_retries = 5
+
 
         if not self.api_key:
             raise PyenConfigurationException("Can't find your API key anywhere")
@@ -61,45 +71,59 @@ class Pyen(object):
 
         url = self.prefix + method
 
-        logger.debug('URL: {0}'.format(url))
-        logger.debug('ARGS: {0}'.format(repr(params)))
-
         max_tries = self.max_retries
         while max_tries > 0:
-            r = requests.request(verb, url, **args)
+            self._apply_throttle()
 
-            if self.auto_throttle:
-                self.throttle(r)
+            r = requests.request(verb, url, **args)
+            self._measure_throttle_time(r)
+
             if r.status_code == 429 and self.auto_throttle:
                 max_tries -= 1
                 logger.debug('RATE LIMITED, retrying ...:')
             else:
                 break
 
+        logger.debug('URL: {0}'.format(r.url))
         if r.status_code >= 400 and r.status_code < 500:
             logger.error('ERROR {0} {1}'.format(r.status_code, r.url))
 
-        logger.debug('HEADERS {0}'.format(repr(r.headers)))
+        # logger.debug('HEADERS {0}'.format(repr(r.headers)))
         logger.debug('RESP: {0}'.format(r.text))
 
+        # print 'status code', r.status_code, r.text
+        # we don't get valid json back on a 404, so, deal with 404 explicitly
+        if r.status_code <> 404:
+            results =  r.json()
+            response = results['response']
+            if response['status']['code'] != 0:
+                raise PyenException(r.status_code, response['status']['code'], response['status']['message'])
+        else:
+            raise PyenException(r.status_code, -1, 'the requested resource could not be found')
+
         r.raise_for_status()
-        results =  r.json()
-        response = results['response']
-        if response['status']['code'] != 0:
-            raise Exception('(' + str(response['status']['code']) + ') - ' + response['status']['message'])
         return response
 
-    def throttle(self, r):
-        remaining = int(r.headers['x-ratelimit-remaining'])
-        if remaining == 0:
-            date_string = r.headers['date']
-            date = self.parse_date(date_string)
-            delay_time = 60 - date.second
-            if delay_time > 0:
+    def _measure_throttle_time(self, r):
+        if self.auto_throttle:
+            if 'x-ratelimit-remaining' in r.headers:
+                remaining = int(r.headers['x-ratelimit-remaining'])
+                if remaining == 0:
+                    date_string = r.headers['date']
+                    date = self._parse_date(date_string)
+                    delay_time = 60 - date.second
+                    if delay_time > 0:
+                        self.next_command_time = time.time() + delay_time
+
+    def _apply_throttle(self):
+        if self.auto_throttle:
+            now = time.time()
+            if self.next_command_time  > now:
+                delay_time = self.next_command_time - now
                 logger.debug('RATE LIMITED, delaying for {0}'.format(delay_time))
                 time.sleep(delay_time)
 
-    def parse_date(self, date_string):
+    def _parse_date(self, date_string):
         # Mon, 21 Oct 2013 18:06:50 GMT
         # TODO:
         # need to be careful about locale here, the locale
@@ -111,11 +135,23 @@ class Pyen(object):
         return date
 
     def post(self, method, args = None, **kwargs):
+        """ Calls the Echo Nest API via a POST
+
+        Args:
+            method: The Echo Nest API method name
+            args: The Echo nest method arguments
+        """
         if args:
             kwargs.update(args)
         return self._internal_call('POST', method, kwargs)
 
     def get(self, method, args = None, **kwargs):
+        """ Calls the Echo Nest API via a GET
+
+        Args:
+            method: The Echo Nest API method name
+            args: The Echo nest method arguments
+        """
         if args:
             kwargs.update(args)
         return self._internal_call('GET', method, kwargs)
