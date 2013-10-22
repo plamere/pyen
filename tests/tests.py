@@ -109,7 +109,7 @@ class TestPyEn(unittest.TestCase):
 
 
 
-    @unittest.skip("skip temporarily")
+    #@unittest.skip("skip temporarily")
     def test_track_upload(self):
         f_path = os.path.join(os.path.dirname(__file__), '../audio/test.ogg')
         f = open(f_path, 'rb')
@@ -124,16 +124,12 @@ class TestPyEn(unittest.TestCase):
         self.assertTrue(response['track']['status'] == 'complete')
 
 
-    @unittest.skip("test is too noisy to run")
     def test_random_walk(self):
         artist_name = 'The Beatles'
-        for i in range(10):
+        for i in range(5):
             response = self.en.get('artist/similar', name=artist_name,
                                         results=15 )
-            print(artist_name)
             self.assertTrue(len(response['artists']) == 15)
-            for artist in response['artists']:
-                print(u"   --> {0}".format(artist['name']))
             artist_name = random.choice(response['artists'])['name']
 
     def test_slow_random_walk(self):
