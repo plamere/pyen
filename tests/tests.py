@@ -202,6 +202,13 @@ class TestPyEn(unittest.TestCase):
         self.assertTrue("artists" in response)
         self.assertTrue(len(response['artists']) >= 15)
         locale.setlocale(locale.LC_ALL, old_locale)
+
+    def test_artist_sims_over_ssl(self):
+        en = pyen.Pyen()
+        en.prefix = 'https://developer.echonest.com/api/v4/'
+        response = en.get('artist/similar', name = 'weezer')
+        self.assertTrue("artists" in response)
+        self.assertTrue(len(response['artists']) >= 15)
         
 
 if __name__ == '__main__':
