@@ -122,3 +122,9 @@ When an error is detected(via the http response or via the Echo Nest return stat
 If you have suggestions, bugs or other issues specific to this library, file them [here](https://github.com/plamere/pyen/issues) or contact me
 at [paul@echonest.com](mailto:paul@echonest.com).
 
+## Version
+- 2.1 - 10/22/2013 - New configuration style
+- 2.0 - 10/21/2013 - New, more pythonic call style
+- 1.1 - 10/19/2013 - Better approach to auto throttling
+- 1.0 - 10/18/2013 - Initial release
+
