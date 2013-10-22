@@ -17,7 +17,7 @@ class PyenException(Exception):
         self.code = code
         self.msg = msg
     def __str__(self):
-        return 'http status: {0}, code:{1} - {2}'.format(self.http_status, self.code, self.msg)
+        return u'http status: {0}, code:{1} - {2}'.format(self.http_status, self.code, self.msg)
 
 class Pyen(object):
 
@@ -80,26 +80,26 @@ class Pyen(object):
 
             if r.status_code == 429 and self.auto_throttle:
                 max_tries -= 1
-                logger.debug('RATE LIMITED, retrying ...:')
+                logger.debug(u'RATE LIMITED, retrying ...:')
             else:
                 break
 
-        logger.debug('URL: {0}'.format(r.url))
+        logger.debug(u'URL: {0}'.format(r.url))
         if r.status_code >= 400 and r.status_code < 500:
-            logger.error('ERROR {0} {1}'.format(r.status_code, r.url))
+            logger.error(u'ERROR {0} {1}'.format(r.status_code, r.url))
 
         # logger.debug('HEADERS {0}'.format(repr(r.headers)))
-        logger.debug('RESP: {0}'.format(r.text))
+        logger.debug(u'RESP: {0}'.format(r.text))
 
         # print 'status code', r.status_code, r.text
         # we don't get valid json back on a 404, so, deal with 404 explicitly
-        if r.status_code <> 404:
+        if r.status_code != 404:
             results =  r.json()
             response = results['response']
             if response['status']['code'] != 0:
                 raise PyenException(r.status_code, response['status']['code'], response['status']['message'])
         else:
-            raise PyenException(r.status_code, -1, 'the requested resource could not be found')
+            raise PyenException(r.status_code, -1, u'the requested resource could not be found')
 
         r.raise_for_status()
         return response
@@ -120,7 +120,7 @@ class Pyen(object):
             now = time.time()
             if self.next_command_time  > now:
                 delay_time = self.next_command_time - now
-                logger.debug('RATE LIMITED, delaying for {0}'.format(delay_time))
+                logger.debug(u'RATE LIMITED, delaying for {0}'.format(delay_time))
                 time.sleep(delay_time)
 
     def _parse_date(self, date_string):
