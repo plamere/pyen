@@ -9,7 +9,7 @@ queue.append('ARH6W4X1187B99274F')
 while len(queue) > 0:
     cid = queue.pop(0)
     if cid not in done:
-        response = en.get('artist/similar', id=cid, bucket='artist_location')
+        response = en.get('artist/similar', id=cid, bucket='artist_location', artist_location="United States")
         done.add(cid)
 
         for artist in response['artists']:
