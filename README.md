@@ -123,6 +123,7 @@ If you have suggestions, bugs or other issues specific to this library, file the
 at [paul@echonest.com](mailto:paul@echonest.com).
 
 ## Version
+- 2.2 - 11/15/2013 - Removed logging to avoid unicode error
 - 2.1 - 10/22/2013 - New configuration style
 - 2.0 - 10/21/2013 - New, more pythonic call style
 - 1.1 - 10/19/2013 - Better approach to auto throttling
