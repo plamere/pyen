@@ -89,7 +89,7 @@ class Pyen(object):
             logger.error(u'ERROR {0} {1}'.format(r.status_code, r.url))
 
         # logger.debug('HEADERS {0}'.format(repr(r.headers)))
-        logger.debug(u'RESP: {0}'.format(r.text))
+        # logger.debug(u'RESP: {0}'.format(r.text))
 
         # print 'status code', r.status_code, r.text
         # we don't get valid json back on a 404, so, deal with 404 explicitly
