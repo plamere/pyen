@@ -1,7 +1,6 @@
 import pyen
 import sys
 
-
 en = pyen.Pyen()
 
 if len(sys.argv) > 1:
