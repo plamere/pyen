@@ -107,6 +107,8 @@ Current configuration parameters are:
 - **max_retries** - (default 5) - maximum number of retries when hitting the rate limit
 
 ## Logging
+*(note, this logging behavior is temporarily disabled)*
+
 You can turn tracing of requests and responses on and off by setting the `pyen` logger:
 
         import logging
@@ -123,6 +125,7 @@ If you have suggestions, bugs or other issues specific to this library, file the
 at [paul@echonest.com](mailto:paul@echonest.com).
 
 ## Version
+- 2.3 - 11/22/2013 - Added more examples
 - 2.2 - 11/15/2013 - Removed logging to avoid unicode error
 - 2.1 - 10/22/2013 - New configuration style
 - 2.0 - 10/21/2013 - New, more pythonic call style
