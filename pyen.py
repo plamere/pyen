@@ -57,7 +57,8 @@ class Pyen(object):
             elif hasattr(v, 'read') and hasattr(v, 'close'):
                 files[k] = v
                 continue
-            elif (method == 'catalog/update' and k == 'data'
+            elif ((method == 'catalog/update'
+                    or method == 'tasteprofile/update') and k == 'data'
                     and not isinstance(v, str)):
                 v = json.dumps(v)
             clean_params[k] = v
