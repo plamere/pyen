@@ -77,6 +77,7 @@ class Pyen(object):
             self._apply_throttle()
 
             r = requests.request(verb, url, **args)
+            print 'pyen request url', r.url
             self._measure_throttle_time(r)
 
             if r.status_code == 429 and self.auto_throttle:
